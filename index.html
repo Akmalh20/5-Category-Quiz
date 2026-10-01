@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandarin Magic Quest - Kids Chinese Quiz</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+SC:wght@500;700;900&display=swap');
+        
+        body {
+            font-family: 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .zh-text {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        /* Bounce and Pop Animations */
+        @keyframes bounce-gentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-bounce-gentle {
+            animation: bounce-gentle 2s infinite ease-in-out;
+        }
+
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        .card-hover:active {
+            transform: translateY(2px) scale(0.98);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Header Navbar -->
+    <header class="bg-white/90 backdrop-blur-md shadow-md sticky top-0 z-50 border-b-4 border-amber-300 px-4 py-3">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            
+            <!-- Logo & Title -->
+            <button onclick="showScreen('category-screen')" class="flex items-center gap-2 group text-left">
+                <div class="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center text-2xl shadow-inner group-hover:rotate-12 transition-transform">
+                    🐼
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 bg-clip-text text-transparent">
+                        Mandarin Quest
+                    </h1>
+                    <p class="text-xs text-slate-500 font-medium">Fun Chinese for Kids</p>
+                </div>
+            </button>
+
+            <!-- Quick Controls -->
+            <div class="flex items-center gap-2 md:gap-3">
+                <!-- Pinyin Toggle Switch -->
+                <button id="pinyin-toggle-btn" onclick="togglePinyin()" title="Toggle Pinyin Display"
+                        class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold rounded-xl text-xs md:text-sm flex items-center gap-1.5 shadow-sm transition border-2 border-indigo-300">
+                    <i class="fa-solid fa-language text-base"></i>
+                    <span>Pinyin: <span id="pinyin-status-text" class="text-emerald-600 font-bold">ON</span></span>
+                </button>
+
+                <!-- Audio Sound Toggle -->
+                <button id="sfx-toggle-btn" onclick="toggleSFX()" title="Sound Effects"
+                        class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl flex items-center justify-center shadow-sm border-2 border-emerald-300">
+                    <i id="sfx-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+
+                <!-- Music Toggle -->
+                <button id="bgm-toggle-btn" onclick="toggleBGM()" title="Background Music"
+                        class="w-9 h-9 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-xl flex items-center justify-center shadow-sm border-2 border-pink-300">
+                    <i id="bgm-icon" class="fa-solid fa-music"></i>
+                </button>
+
+                <!-- Total Stars Score -->
+                <div class="flex items-center gap-1 bg-amber-100 border-2 border-amber-300 px-3 py-1 rounded-xl text-amber-800 font-bold text-sm">
+                    <i class="fa-solid fa-star text-amber-500"></i>
+                    <span id="total-stars-count">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- 1. CATEGORY SELECTION SCREEN -->
+        <section id="category-screen" class="space-y-6">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-red-400 via-orange-400 to-amber-400 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="z-10 text-center md:text-left space-y-2">
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Welcome Little Explorer! 🌟</span>
+                    <h2 class="text-2xl md:text-4xl font-extrabold drop-shadow">Choose a Quiz Category</h2>
+                    <p class="text-amber-100 text-sm md:text-base">Tap a category to start learning Chinese Chinese characters and words!</p>
+                </div>
+                <div class="text-6xl md:text-8xl z-10 animate-bounce-gentle">
+                    🐼
+                </div>
+                <!-- Background decorative shapes -->
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
+            </div>
+
+            <!-- Category Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                
+                <!-- Category 1: Colors -->
+                <div onclick="selectCategory('colors')" 
+                     class="card-hover bg-gradient-to-br from-pink-500 to-rose-400 text-white rounded-3xl p-5 cursor-pointer shadow-lg relative overflow-hidden flex flex-col justify-between h-44">
+                    <div class="flex justify-between items-start z-10">
+                        <span class="text-4xl">🎨</span>
+                        <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full font-bold">10 Words</span>
+                    </div>
+                    <div class="z-10">
+                        <h3 class="text-2xl font-bold">Colors</h3>
+                        <p class="text-pink-100 text-xs mt-0.5 zh-text">颜色 (Yánsè) • Red, Yellow, Blue...</p>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                </div>
+
+                <!-- Category 2: Animals -->
+                <div onclick="selectCategory('animals')" 
+                     class="card-hover bg-gradient-to-br from-amber-500 to-yellow-400 text-white rounded-3xl p-5 cursor-pointer shadow-lg relative overflow-hidden flex flex-col justify-between h-44">
+                    <div class="flex justify-between items-start z-10">
+                        <span class="text-4xl">🦁</span>
+                        <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full font-bold">10 Animals</span>
+                    </div>
+                    <div class="z-10">
+                        <h3 class="text-2xl font-bold">Animals</h3>
+                        <p class="text-amber-100 text-xs mt-0.5 zh-text">动物 (Dòngwù) • Bear, Lion, Elephant...</p>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                </div>
+
+                <!-- Category 3: Nature -->
+                <div onclick="selectCategory('nature')" 
+                     class="card-hover bg-gradient-to-br from-emerald-500 to-teal-400 text-white rounded-3xl p-5 cursor-pointer shadow-lg relative overflow-hidden flex flex-col justify-between h-44">
+                    <div class="flex justify-between items-start z-10">
+                        <span class="text-4xl">🌿</span>
+                        <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full font-bold">7 Words</span>
+                    </div>
+                    <div class="z-10">
+                        <h3 class="text-2xl font-bold">Nature</h3>
+                        <p class="text-emerald-100 text-xs mt-0.5 zh-text">自然 (Zìrán) • Sun, Cloud, Tree...</p>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                </div>
+
+                <!-- Category 4: Family -->
+                <div onclick="selectCategory('family')" 
+                     class="card-hover bg-gradient-to-br from-sky-500 to-blue-400 text-white rounded-3xl p-5 cursor-pointer shadow-lg relative overflow-hidden flex flex-col justify-between h-44">
+                    <div class="flex justify-between items-start z-10">
+                        <span class="text-4xl">👨‍‍👩‍👧‍👦</span>
+                        <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full font-bold">7 Members</span>
+                    </div>
+                    <div class="z-10">
+                        <h3 class="text-2xl font-bold">Family</h3>
+                        <p class="text-sky-100 text-xs mt-0.5 zh-text">家庭 (Jiātíng) • Mom, Dad, Brother...</p>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                </div>
+
+                <!-- Category 5: Numbers 1-99 -->
+                <div onclick="selectCategory('numbers')" 
+                     class="card-hover bg-gradient-to-br from-purple-500 to-indigo-500 text-white rounded-3xl p-5 cursor-pointer shadow-lg relative overflow-hidden flex flex-col justify-between h-44 sm:col-span-2 lg:col-span-1">
+                    <div class="flex justify-between items-start z-10">
+                        <span class="text-4xl">🔢</span>
+                        <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full font-bold">Numbers 1 - 99</span>
+                    </div>
+                    <div class="z-10">
+                        <h3 class="text-2xl font-bold">Numbers 1–99</h3>
+                        <p class="text-purple-100 text-xs mt-0.5 zh-text">数字 (Shùzì) • 一, 十, 二十三...</p>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 2. MODE SELECTION SCREEN -->
+        <section id="mode-screen" class="hidden space-y-6">
+            <!-- Header with Back button -->
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('category-screen')" 
+                        class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-2xl border-2 border-slate-200 flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Back to Categories</span>
+                </button>
+                <div id="selected-category-badge" class="px-4 py-1.5 rounded-full font-bold text-sm bg-amber-200 text-amber-900 border border-amber-300">
+                    Category Name
+                </div>
+            </div>
+
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-extrabold text-slate-800">Choose Play Mode</h2>
+                <p class="text-slate-500">How would you like to practice today?</p>
+            </div>
+
+            <!-- Mode Options -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                
+                <!-- Quiz Challenge -->
+                <div onclick="startQuiz('quiz')" 
+                     class="card-hover bg-white border-4 border-emerald-400 hover:border-emerald-500 rounded-3xl p-6 text-center cursor-pointer shadow-md flex flex-col items-center justify-between space-y-4">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl">
+                        🎯
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Multiple Choice</h3>
+                        <p class="text-slate-500 text-xs mt-1">Read the prompt and select the correct Chinese character card!</p>
+                    </div>
+                    <button class="w-full py-2.5 bg-emerald-500 text-white font-bold rounded-xl shadow">Play Quiz</button>
+                </div>
+
+                <!-- Listening Challenge -->
+                <div onclick="startQuiz('listen')" 
+                     class="card-hover bg-white border-4 border-sky-400 hover:border-sky-500 rounded-3xl p-6 text-center cursor-pointer shadow-md flex flex-col items-center justify-between space-y-4">
+                    <div class="w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center text-3xl">
+                        🎧
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Listen & Pick</h3>
+                        <p class="text-slate-500 text-xs mt-1">Listen to the audio pronunciation and pick the right Hanzi!</p>
+                    </div>
+                    <button class="w-full py-2.5 bg-sky-500 text-white font-bold rounded-xl shadow">Listen Quiz</button>
+                </div>
+
+                <!-- Flashcard Learn Mode -->
+                <div onclick="openFlashcards()" 
+                     class="card-hover bg-white border-4 border-purple-400 hover:border-purple-500 rounded-3xl p-6 text-center cursor-pointer shadow-md flex flex-col items-center justify-between space-y-4">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-3xl">
+                        📖
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Learn & Study</h3>
+                        <p class="text-slate-500 text-xs mt-1">Interactive flashcards with audio, pinyin, and translations!</p>
+                    </div>
+                    <button class="w-full py-2.5 bg-purple-500 text-white font-bold rounded-xl shadow">Study Cards</button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. FLASHCARDS SCREEN -->
+        <section id="flashcard-screen" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('mode-screen')" 
+                        class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-2xl border-2 border-slate-200 flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Back</span>
+                </button>
+                <div class="text-sm font-bold text-slate-600">
+                    Card <span id="fc-index">1</span> / <span id="fc-total">10</span>
+                </div>
+            </div>
+
+            <!-- Flashcard Display Box -->
+            <div class="max-w-md mx-auto bg-white border-4 border-indigo-200 rounded-3xl p-8 shadow-xl flex flex-col items-center justify-center space-y-6 text-center min-h-[340px] relative">
+                
+                <!-- Category Icon / Picture placeholder -->
+                <div id="fc-symbol" class="text-6xl mb-2 animate-bounce-gentle">
+                    🍎
+                </div>
+
+                <!-- Hanzi Character -->
+                <div id="fc-hanzi" class="text-6xl md:text-7xl font-extrabold text-slate-800 zh-text tracking-wide">
+                    红色
+                </div>
+
+                <!-- Pinyin Text -->
+                <div id="fc-pinyin" class="text-xl md:text-2xl font-bold text-indigo-600 bg-indigo-50 px-4 py-1 rounded-full border border-indigo-100">
+                    hóng sè
+                </div>
+
+                <!-- English Meaning -->
+                <div id="fc-english" class="text-lg md:text-xl font-semibold text-slate-600">
+                    Red
+                </div>
+
+                <!-- Speak Button -->
+                <button onclick="speakCurrentFlashcard()" 
+                        class="w-12 h-12 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg transition active:scale-95">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+
+            <!-- Flashcard Navigation Controls -->
+            <div class="flex justify-center items-center gap-4 max-w-md mx-auto">
+                <button onclick="prevFlashcard()" 
+                        class="px-6 py-3 bg-white hover:bg-slate-100 text-slate-800 font-bold rounded-2xl border-2 border-slate-200 shadow flex items-center gap-2">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                <button onclick="nextFlashcard()" 
+                        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow flex items-center gap-2">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. ACTIVE QUIZ PLAY SCREEN -->
+        <section id="quiz-screen" class="hidden space-y-6">
+            
+            <!-- Progress Bar and Streak Tracker -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-200 flex flex-col md:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <button onclick="showScreen('mode-screen')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-2xl"></i>
+                    </button>
+                    <div class="w-full md:w-64 bg-slate-100 h-3.5 rounded-full overflow-hidden border border-slate-200">
+                        <div id="quiz-progress-bar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <span id="quiz-question-counter" class="text-xs font-bold text-slate-500 whitespace-nowrap">1 / 10</span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Current Score -->
+                    <div class="text-sm font-bold text-slate-600">
+                        Score: <span id="quiz-score-num" class="text-emerald-600 font-extrabold text-lg">0</span>
+                    </div>
+
+                    <!-- Streak Flame -->
+                    <div class="flex items-center gap-1 bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold border border-orange-200">
+                        <i class="fa-solid fa-fire text-orange-500"></i>
+                        <span>Streak: <span id="quiz-streak-count">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white border-4 border-amber-300 rounded-3xl p-6 md:p-8 shadow-xl text-center space-y-4 relative overflow-hidden">
+                
+                <span id="quiz-type-badge" class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    Select the Chinese character
+                </span>
+
+                <!-- Question Prompt -->
+                <div id="quiz-prompt-container" class="space-y-3">
+                    <h3 id="quiz-prompt-title" class="text-sm md:text-base text-slate-500 font-medium">What is the Chinese character for:</h3>
+                    
+                    <div class="flex items-center justify-center gap-3">
+                        <div id="quiz-prompt-text" class="text-3xl md:text-5xl font-extrabold text-slate-800">
+                            Elephant
+                        </div>
+                        
+                        <!-- Audio Button for Listening / Replaying -->
+                        <button id="quiz-audio-repeat-btn" onclick="speakCurrentQuestion()" 
+                                class="w-12 h-12 bg-amber-400 hover:bg-amber-500 text-white rounded-full flex items-center justify-center text-xl shadow-md transition active:scale-95">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Answer Cards Grid (Murid pilih karakter yang betul) -->
+            <div id="quiz-options-grid" class="grid grid-cols-2 gap-3 md:gap-4">
+                <!-- Dynamic choices injected via JS -->
+            </div>
+
+            <!-- Feedback Overlay / Banner -->
+            <div id="feedback-banner" class="hidden rounded-2xl p-4 text-center font-bold text-white shadow-lg transition-all animate-bounce-gentle">
+                <span id="feedback-text">Awesome! 正确!</span>
+            </div>
+
+        </section>
+
+        <!-- 5. RESULTS & VICTORY SCREEN -->
+        <section id="results-screen" class="hidden space-y-6 text-center">
+            
+            <div class="bg-white border-4 border-amber-300 rounded-3xl p-8 shadow-2xl space-y-6 max-w-md mx-auto relative overflow-hidden">
+                
+                <div class="text-6xl animate-bounce-gentle">
+                    🏆
+                </div>
+
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">Quiz Completed!</h2>
+                    <p class="text-slate-500 text-sm mt-1">Great job practicing your Chinese!</p>
+                </div>
+
+                <!-- Star Rating Stars -->
+                <div class="flex justify-center gap-2 text-4xl text-amber-400">
+                    <i id="star-1" class="fa-solid fa-star"></i>
+                    <i id="star-2" class="fa-solid fa-star"></i>
+                    <i id="star-3" class="fa-solid fa-star"></i>
+                </div>
+
+                <!-- Score Summary Box -->
+                <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <span class="text-xs text-slate-500 font-bold block">TOTAL SCORE</span>
+                        <span id="res-total-score" class="text-2xl font-extrabold text-emerald-600">100</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-bold block">ACCURACY</span>
+                        <span id="res-accuracy" class="text-2xl font-extrabold text-indigo-600">100%</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3 pt-2">
+                    <button onclick="retryCurrentQuiz()" 
+                            class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-2xl shadow-lg transition active:scale-95 text-lg">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Play Again
+                    </button>
+                    <button onclick="showScreen('category-screen')" 
+                            class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-2xl shadow transition active:scale-95">
+                        <i class="fa-solid fa-house mr-2"></i> Main Menu
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="bg-white/60 border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p>Interactive Chinese Quiz • Designed for Kids & Learners</p>
+    </footer>
+
+    <!-- JavaScript Game Logic -->
+    <script>
+        
+        // Settings State
+        let showPinyin = true;
+        let sfxEnabled = true;
+        let bgmEnabled = false;
+        let totalStars = 0;
+
+        // Current Active Session State
+        let currentCategoryKey = 'colors';
+        let currentMode = 'quiz'; // 'quiz', 'listen', 'flashcard'
+        let currentQuestions = [];
+        let currentQuestionIdx = 0;
+        let score = 0;
+        let streak = 0;
+        let correctAnswersCount = 0;
+
+        // Flashcard State
+        let flashcardIdx = 0;
+
+        const VOCABULARY_DATA = {
+            colors: {
+                title: "Colors (颜色)",
+                badgeColor: "bg-pink-100 text-pink-800 border-pink-300",
+                items: [
+                    { hanzi: "红色", pinyin: "hóng sè", english: "Red", symbol: "🔴" },
+                    { hanzi: "黄色", pinyin: "huáng sè", english: "Yellow", symbol: "🟡" },
+                    { hanzi: "白色", pinyin: "bái sè", english: "White", symbol: "⚪" },
+                    { hanzi: "蓝色", pinyin: "lán sè", english: "Blue", symbol: "🔵" },
+                    { hanzi: "绿色", pinyin: "lǜ sè", english: "Green", symbol: "🟢" },
+                    { hanzi: "橙色", pinyin: "chéng sè", english: "Orange", symbol: "🟠" },
+                    { hanzi: "紫色", pinyin: "zǐ sè", english: "Purple", symbol: "🟣" },
+                    { hanzi: "粉红色", pinyin: "fěn hóng sè", english: "Pink", symbol: "🌸" },
+                    { hanzi: "褐色", pinyin: "hè sè", english: "Brown", symbol: "🤎" },
+                    { hanzi: "黑色", pinyin: "hēi sè", english: "Black", symbol: "🖤" }
+                ]
+            },
+            animals: {
+                title: "Animals (动物)",
+                badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+                items: [
+                    { hanzi: "熊", pinyin: "xióng", english: "Bear", symbol: "🐻" },
+                    { hanzi: "鳄鱼", pinyin: "è yú", english: "Crocodile", symbol: "🐊" },
+                    { hanzi: "狮子", pinyin: "shī zi", english: "Lion", symbol: "🦁" },
+                    { hanzi: "老虎", pinyin: "lǎo hǔ", english: "Tiger", symbol: "🐯" },
+                    { hanzi: "河马", pinyin: "hé mǎ", english: "Hippopotamus", symbol: "🦛" },
+                    { hanzi: "犀牛", pinyin: "xī niú", english: "Rhinoceros", symbol: "🦏" },
+                    { hanzi: "大象", pinyin: "dà xiàng", english: "Elephant", symbol: "🐘" },
+                    { hanzi: "长颈鹿", pinyin: "cháng jǐng lù", english: "Giraffe", symbol: "🦒" },
+                    { hanzi: "猴子", pinyin: "hóu zi", english: "Monkey", symbol: "🐒" },
+                    { hanzi: "猩猩", pinyin: "xīng xing", english: "Gorilla", symbol: "🦍" }
+                ]
+            },
+            nature: {
+                title: "Nature (自然)",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                items: [
+                    { hanzi: "云", pinyin: "yún", english: "Cloud", symbol: "☁️" },
+                    { hanzi: "太阳", pinyin: "tài yáng", english: "Sun", symbol: "☀️" },
+                    { hanzi: "草", pinyin: "cǎo", english: "Grass", symbol: "🌱" },
+                    { hanzi: "树", pinyin: "shù", english: "Tree", symbol: "🌳" },
+                    { hanzi: "叶子", pinyin: "yè zi", english: "Leaf", symbol: "🍃" },
+                    { hanzi: "花", pinyin: "huā", english: "Flower", symbol: "🌺" },
+                    { hanzi: "天", pinyin: "tiān", english: "Sky", symbol: "🌤️" }
+                ]
+            },
+            family: {
+                title: "Family (家庭)",
+                badgeColor: "bg-sky-100 text-sky-800 border-sky-300",
+                items: [
+                    { hanzi: "妈妈", pinyin: "mā ma", english: "Mom", symbol: "👩" },
+                    { hanzi: "爸爸", pinyin: "bà ba", english: "Dad", symbol: "👨" },
+                    { hanzi: "我", pinyin: "wǒ", english: "Me", symbol: "🧒" },
+                    { hanzi: "弟弟", pinyin: "dì di", english: "Younger Brother", symbol: "👦" },
+                    { hanzi: "哥哥", pinyin: "gē ge", english: "Older Brother", symbol: "🧑" },
+                    { hanzi: "姐姐", pinyin: "jiě jie", english: "Older Sister", symbol: "👧" },
+                    { hanzi: "妹妹", pinyin: "mèi mei", english: "Younger Sister", symbol: "👶" }
+                ]
+            },
+            numbers: {
+                title: "Numbers 1-99 (数字)",
+                badgeColor: "bg-purple-100 text-purple-800 border-purple-300",
+                items: generateNumbers1to99()
+            }
+        };
+
+        function generateNumbers1to99() {
+            const digits = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+            const pinyins = ["líng", "yī", "èr", "sān", "sì", "wǔ", "liù", "qī", "bā", "jiǔ", "shí"];
+            
+            const list = [];
+            for (let i = 1; i <= 99; i++) {
+                let hanzi = "";
+                let pinyin = "";
+
+                if (i <= 10) {
+                    hanzi = digits[i];
+                    pinyin = pinyins[i];
+                } else if (i < 20) {
+                    let ones = i % 10;
+                    hanzi = "十" + digits[ones];
+                    pinyin = "shí " + pinyins[ones];
+                } else {
+                    let tens = Math.floor(i / 10);
+                    let ones = i % 10;
+                    if (ones === 0) {
+                        hanzi = digits[tens] + "十";
+                        pinyin = pinyins[tens] + " shí";
+                    } else {
+                        hanzi = digits[tens] + "十" + digits[ones];
+                        pinyin = pinyins[tens] + " shí " + pinyins[ones];
+                    }
+                }
+
+                list.push({
+                    hanzi: hanzi,
+                    pinyin: pinyin,
+                    english: `Number ${i}`,
+                    symbol: `#${i}`
+                });
+            }
+            return list;
+        }
+
+        let audioCtx = null;
+        let bgmInterval = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!sfxEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                
+                if (type === 'correct') {
+                    // Upbeat major triad chime
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'wrong') {
+                    // Gentle low wobble
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(160, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'click') {
+                    // Subtle click
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        /* Background Music Synthesizer Loop */
+        function startBGM() {
+            if (bgmInterval) clearInterval(bgmInterval);
+            const notes = [261.63, 329.63, 392.00, 440.00, 523.25, 392.00]; // Cute C-major pentatonic
+            let step = 0;
+
+            bgmInterval = setInterval(() => {
+                if (!bgmEnabled) return;
+                try {
+                    const ctx = getAudioContext();
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(notes[step % notes.length], now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                    step++;
+                } catch (e) {}
+            }, 500);
+        }
+
+        function stopBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        function speakChinese(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); // Stop current speech
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.85; // Slightly slower for clear child learning
+            utterance.pitch = 1.1;  // Slightly higher friendly pitch
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function togglePinyin() {
+            showPinyin = !showPinyin;
+            document.getElementById('pinyin-status-text').innerText = showPinyin ? "ON" : "OFF";
+            document.getElementById('pinyin-status-text').className = showPinyin ? "text-emerald-600 font-bold" : "text-rose-500 font-bold";
+            playSound('click');
+
+            // Refresh current UI if active in flashcards or quiz
+            if (!document.getElementById('flashcard-screen').classList.contains('hidden')) {
+                renderFlashcard();
+            } else if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
+                renderQuestion();
+            }
+        }
+
+        function toggleSFX() {
+            sfxEnabled = !sfxEnabled;
+            const icon = document.getElementById('sfx-icon');
+            icon.className = sfxEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+            if (sfxEnabled) playSound('click');
+        }
+
+        function toggleBGM() {
+            bgmEnabled = !bgmEnabled;
+            const icon = document.getElementById('bgm-icon');
+            icon.className = bgmEnabled ? "fa-solid fa-music text-pink-600 animate-pulse" : "fa-solid fa-slash";
+            
+            if (bgmEnabled) {
+                getAudioContext();
+                startBGM();
+            } else {
+                stopBGM();
+            }
+        }
+
+        function showScreen(screenId) {
+            ['category-screen', 'mode-screen', 'flashcard-screen', 'quiz-screen', 'results-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            playSound('click');
+        }
+
+        function selectCategory(catKey) {
+            currentCategoryKey = catKey;
+            const cat = VOCABULARY_DATA[catKey];
+            
+            const badge = document.getElementById('selected-category-badge');
+            badge.innerText = cat.title;
+            badge.className = `px-4 py-1.5 rounded-full font-bold text-sm border ${cat.badgeColor}`;
+
+            showScreen('mode-screen');
+        }
+
+        function openFlashcards() {
+            flashcardIdx = 0;
+            showScreen('flashcard-screen');
+            renderFlashcard();
+        }
+
+        function renderFlashcard() {
+            const items = VOCABULARY_DATA[currentCategoryKey].items;
+            const item = items[flashcardIdx];
+
+            document.getElementById('fc-index').innerText = flashcardIdx + 1;
+            document.getElementById('fc-total').innerText = items.length;
+            document.getElementById('fc-symbol').innerText = item.symbol;
+            document.getElementById('fc-hanzi').innerText = item.hanzi;
+            
+            const pinyinEl = document.getElementById('fc-pinyin');
+            if (showPinyin) {
+                pinyinEl.innerText = item.pinyin;
+                pinyinEl.classList.remove('hidden');
+            } else {
+                pinyinEl.classList.add('hidden');
+            }
+
+            document.getElementById('fc-english').innerText = item.english;
+
+            // Automatically speak Chinese word
+            speakChinese(item.hanzi);
+        }
+
+        function speakCurrentFlashcard() {
+            const items = VOCABULARY_DATA[currentCategoryKey].items;
+            speakChinese(items[flashcardIdx].hanzi);
+        }
+
+        function nextFlashcard() {
+            const items = VOCABULARY_DATA[currentCategoryKey].items;
+            flashcardIdx = (flashcardIdx + 1) % items.length;
+            renderFlashcard();
+            playSound('click');
+        }
+
+        function prevFlashcard() {
+            const items = VOCABULARY_DATA[currentCategoryKey].items;
+            flashcardIdx = (flashcardIdx - 1 + items.length) % items.length;
+            renderFlashcard();
+            playSound('click');
+        }
+
+        function startQuiz(mode) {
+            currentMode = mode; // 'quiz' or 'listen'
+            score = 0;
+            streak = 0;
+            correctAnswersCount = 0;
+            currentQuestionIdx = 0;
+
+            let pool = [...VOCABULARY_DATA[currentCategoryKey].items];
+            
+            // Shuffle question items
+            pool.sort(() => Math.random() - 0.5);
+
+            // Limit quiz round to max 10 questions for kids
+            currentQuestions = pool.slice(0, Math.min(10, pool.length));
+
+            document.getElementById('quiz-score-num').innerText = "0";
+            document.getElementById('quiz-streak-count').innerText = "0";
+
+            showScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const currentItem = currentQuestions[currentQuestionIdx];
+            const total = currentQuestions.length;
+
+            // Hide feedback
+            document.getElementById('feedback-banner').classList.add('hidden');
+
+            // Update Progress Bar
+            const percent = ((currentQuestionIdx) / total) * 100;
+            document.getElementById('quiz-progress-bar').style.width = percent + "%";
+            document.getElementById('quiz-question-counter').innerText = `${currentQuestionIdx + 1} / ${total}`;
+
+            const badge = document.getElementById('quiz-type-badge');
+            const promptTitle = document.getElementById('quiz-prompt-title');
+            const promptText = document.getElementById('quiz-prompt-text');
+
+            if (currentMode === 'quiz') {
+                badge.innerText = "Match English to Character";
+                promptTitle.innerText = "Select the correct Chinese character for:";
+                promptText.innerText = `${currentItem.symbol} ${currentItem.english}`;
+            } else if (currentMode === 'listen') {
+                badge.innerText = "Listening Test 🎧";
+                promptTitle.innerText = "Listen to the Chinese word and pick the correct character:";
+                promptText.innerText = "🔊 Tap Sound to Hear";
+                
+                // Automatically speak prompt
+                speakChinese(currentItem.hanzi);
+            }
+
+            // Generate Options Grid (1 Correct + 3 Distractors)
+            generateOptions(currentItem);
+        }
+
+        function speakCurrentQuestion() {
+            const currentItem = currentQuestions[currentQuestionIdx];
+            speakChinese(currentItem.hanzi);
+        }
+
+        function generateOptions(correctItem) {
+            const allCategoryItems = VOCABULARY_DATA[currentCategoryKey].items;
+            
+            // Pick 3 distractors
+            let distractors = allCategoryItems.filter(item => item.hanzi !== correctItem.hanzi);
+            distractors.sort(() => Math.random() - 0.5);
+            distractors = distractors.slice(0, 3);
+
+            // Combine and Shuffle
+            let options = [correctItem, ...distractors];
+            options.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('quiz-options-grid');
+            grid.innerHTML = '';
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = "card-hover bg-white border-4 border-amber-200 hover:border-amber-400 rounded-3xl p-5 shadow-md flex flex-col items-center justify-center space-y-1 transition text-center min-h-[120px]";
+                
+                button.onclick = () => handleAnswer(option, correctItem, button);
+
+                button.innerHTML = `
+                    <span class="text-3xl md:text-5xl font-extrabold text-slate-800 zh-text">${option.hanzi}</span>
+                    ${showPinyin ? `<span class="text-sm font-bold text-indigo-600">${option.pinyin}</span>` : ''}
+                `;
+
+                grid.appendChild(button);
+            });
+        }
+
+        function handleAnswer(selectedOption, correctItem, clickedBtn) {
+            const isCorrect = selectedOption.hanzi === correctItem.hanzi;
+            const optionsBtns = document.getElementById('quiz-options-grid').children;
+
+            // Disable all options during feedback
+            for (let btn of optionsBtns) {
+                btn.disabled = true;
+            }
+
+            const feedbackBanner = document.getElementById('feedback-banner');
+            const feedbackText = document.getElementById('feedback-text');
+
+            if (isCorrect) {
+                correctAnswersCount++;
+                streak++;
+                score += 10 + (streak * 2);
+
+                clickedBtn.className = "bg-emerald-500 text-white border-4 border-emerald-600 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center space-y-1 text-center scale-105 transition min-h-[120px]";
+                
+                feedbackBanner.className = "rounded-2xl p-4 text-center font-bold text-white bg-emerald-500 shadow-lg border-2 border-emerald-600 animate-bounce-gentle";
+                feedbackText.innerText = `✨ Correct! ${correctItem.hanzi} (${correctItem.pinyin}) = ${correctItem.english}`;
+                
+                playSound('correct');
+                speakChinese(correctItem.hanzi);
+            } else {
+                streak = 0;
+                clickedBtn.className = "bg-rose-500 text-white border-4 border-rose-600 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center space-y-1 text-center transition min-h-[120px]";
+                
+                // Highlight correct one
+                for (let btn of optionsBtns) {
+                    if (btn.innerText.includes(correctItem.hanzi)) {
+                        btn.className = "bg-emerald-100 text-emerald-800 border-4 border-emerald-400 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center space-y-1 text-center min-h-[120px]";
+                    }
+                }
+
+                feedbackBanner.className = "rounded-2xl p-4 text-center font-bold text-white bg-rose-500 shadow-lg border-2 border-rose-600";
+                feedbackText.innerText = `Oops! Correct answer was: ${correctItem.hanzi} (${correctItem.pinyin})`;
+                
+                playSound('wrong');
+            }
+
+            feedbackBanner.classList.remove('hidden');
+            document.getElementById('quiz-score-num').innerText = score;
+            document.getElementById('quiz-streak-count').innerText = streak;
+
+            // Delay before next question
+            setTimeout(() => {
+                currentQuestionIdx++;
+                if (currentQuestionIdx < currentQuestions.length) {
+                    renderQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 1800);
+        }
+
+        function finishQuiz() {
+            const total = currentQuestions.length;
+            const accuracy = Math.round((correctAnswersCount / total) * 100);
+
+            // Calculate stars
+            let earnedStars = 1;
+            if (accuracy >= 80) earnedStars = 3;
+            else if (accuracy >= 50) earnedStars = 2;
+
+            totalStars += earnedStars;
+            document.getElementById('total-stars-count').innerText = totalStars;
+
+            // Set Victory Stars UI
+            document.getElementById('star-1').className = earnedStars >= 1 ? "fa-solid fa-star text-amber-400 animate-bounce" : "fa-solid fa-star text-slate-200";
+            document.getElementById('star-2').className = earnedStars >= 2 ? "fa-solid fa-star text-amber-400 animate-bounce" : "fa-solid fa-star text-slate-200";
+            document.getElementById('star-3').className = earnedStars >= 3 ? "fa-solid fa-star text-amber-400 animate-bounce" : "fa-solid fa-star text-slate-200";
+
+            document.getElementById('res-total-score').innerText = score;
+            document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+
+            showScreen('results-screen');
+
+            // Trigger Confetti Celebration
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            playSound('correct');
+        }
+
+        function retryCurrentQuiz() {
+            startQuiz(currentMode);
+        }
+
+        // Initialize Audio Context on first click anywhere
+        window.addEventListener('click', () => {
+            getAudioContext();
+        }, { once: true });
+    </script>
+</body>
+</html>
